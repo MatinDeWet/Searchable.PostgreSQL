@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Searchable.PostgreSQL.UnitTests/Searchable.PostgreSQL.UnitTests.csproj" />
+  <Project Path="Searchable.PostgreSQL/Searchable.PostgreSQL.csproj" />
+</Solution>

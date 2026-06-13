@@ -1,0 +1,91 @@
+name: NuGet Publish
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Package version (e.g., 1.0.0)'
+        required: true
+  release:
+    types: [published]
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: 10.0.x
+
+    - name: Set version from input or release tag
+      shell: bash
+      run: |
+        set -euo pipefail
+
+        if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+          version="${{ github.event.inputs.version }}"
+        else
+          version="${{ github.event.release.tag_name }}"
+          version="${version#v}"
+        fi
+
+        if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+([-.][0-9A-Za-z.-]+)?$ ]]; then
+          echo "Invalid package version: $version"
+          exit 1
+        fi
+
+        echo "PACKAGE_VERSION=$version" >> "$GITHUB_ENV"
+
+    - name: Restore dependencies
+      run: dotnet restore
+
+    - name: Build
+      run: dotnet build --configuration Release /p:Version=${{ env.PACKAGE_VERSION }} --no-restore
+
+    - name: Test
+      run: dotnet test --configuration Release --no-build
+
+    - name: Pack Searchable.PostgreSQL
+      run: dotnet pack Searchable.PostgreSQL/Searchable.PostgreSQL.csproj --configuration Release /p:Version=${{ env.PACKAGE_VERSION }} --no-build --output nupkgs
+
+    - name: NuGet login (OIDC -> temp API key)
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: ${{ secrets.NUGET_USER }}
+
+    - name: Upload packages as artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: nuget-packages
+        path: |
+          nupkgs/*.nupkg
+          nupkgs/*.snupkg
+
+    - name: Publish to NuGet
+      shell: bash
+      run: |
+        set -euo pipefail
+        shopt -s nullglob
+
+        packages=(nupkgs/*.nupkg nupkgs/*.snupkg)
+        if (( ${#packages[@]} == 0 )); then
+          echo "No package files found in nupkgs/."
+          exit 1
+        fi
+
+        for package in "${packages[@]}"; do
+          dotnet nuget push "$package" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
+        done
+
+permissions:
+  contents: read
