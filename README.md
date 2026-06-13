@@ -1,10 +1,8 @@
 # Searchable.PostgreSQL
 
 [![NuGet Version](https://img.shields.io/nuget/v/MatinDeWet.Searchable.PostgreSQL)](https://www.nuget.org/packages/MatinDeWet.Searchable.PostgreSQL)
-[![License](https://img.shields.io/github/license/MatinDeWet/Searchable.PostgreSQL)](LICENSE.txt)
 [![CI Status](https://img.shields.io/github/actions/workflow/status/MatinDeWet/Searchable.PostgreSQL/CI.yml?branch=master)](https://github.com/MatinDeWet/Searchable.PostgreSQL/actions/workflows/CI.yml)
 [![Publish Status](https://img.shields.io/github/actions/workflow/status/MatinDeWet/Searchable.PostgreSQL/nuget-publish.yml?branch=master)](https://github.com/MatinDeWet/Searchable.PostgreSQL/actions/workflows/nuget-publish.yml)
-[![Support](https://img.shields.io/badge/support-buy_me_a_coffee-ffdd00?logo=buymeacoffee&logoColor=000000)](https://buymeacoffee.com/matindewet)
 
 PostgreSQL-specific dynamic search helpers for Entity Framework Core.
 
