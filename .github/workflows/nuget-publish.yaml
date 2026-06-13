@@ -6,12 +6,8 @@ on:
       version:
         description: 'Package version (e.g., 1.0.0)'
         required: true
-        type: string
   release:
     types: [published]
-
-permissions:
-  contents: read
 
 jobs:
   build-and-publish:
@@ -90,3 +86,6 @@ jobs:
         for package in "${packages[@]}"; do
           dotnet nuget push "$package" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
         done
+
+permissions:
+  contents: read
